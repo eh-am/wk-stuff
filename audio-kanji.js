@@ -408,54 +408,67 @@
 
     // If the word is not in the list
     if (index === -1 && itemType == "Kanji") {
+      const quiz_input = get_controller("quiz-input");
+      const pronunciation =
+        quiz_input.currentSubject[
+          quiz_input.currentSubject.primary_reading_type
+        ][0];
+      const audioLink = AudioKanjiData[pronunciation];
+
       // Create a new object with the word, audio link and isReadingComplete properties
       let newItem = {
         word: word,
-        audioLink: null,
+        audioLink: audioLink ? audioLink : null,
         isReadingComplete: false,
       };
+
       // Add the new item to the list
       wordList.push(newItem);
     }
-    // If the word is already in the list
-    else if (index !== -1) {
-      if (hasPlayedAlready) return;
-      // Get the existing item from the list
-      let existingItem = wordList[index];
 
-      // If isReadingComplete is true
-      if (existingItem.isReadingComplete) {
-        // Play the audio link
-        if (existingItem.audioLink == null) return;
-        let audio = new Audio(existingItem.audioLink);
-        if (audio == null) console.log("Invalid Audio");
-        else {
-          audio.play();
-          hasPlayedAlready = true;
-          let audioButton = document.querySelector(
-            '[data-action="quiz-audio#play"]'
-          );
-          let audioIcon = audioButton.querySelector("i");
-          audioButton.onclick = function () {
-            if (audio.paused) {
-              audio.play();
-              audioIcon.classList.remove("fa-volume-off");
-              audioIcon.classList.add("fa-volume-high");
-              audioButton.classList.remove(
-                "additional-content__item--disabled"
-              );
-            }
-          };
-          audio.onended = function () {
-            audioIcon.classList.remove("fa-volume-high");
-            audioIcon.classList.add("fa-volume-off");
-          };
-          setTimeout(function () {
+    // get hte index again since we need it
+    index = wordList.findIndex(function (item) {
+      return item.word === word;
+    });
+    // If the word is already in the list
+    //else if (index !== -1) {
+    if (hasPlayedAlready) return;
+    // Get the existing item from the list
+    let existingItem = wordList[index];
+
+    console.log("tocar audio questionType", questionType);
+    // If isReadingComplete is true
+    if (existingItem.isReadingComplete || questionType === "reading") {
+      console.log("should play audio");
+      // Play the audio link
+      if (existingItem.audioLink == null) return;
+      let audio = new Audio(existingItem.audioLink);
+      if (audio == null) console.log("Invalid Audio");
+      else {
+        audio.play();
+        hasPlayedAlready = true;
+        let audioButton = document.querySelector(
+          '[data-action="quiz-audio#play"]'
+        );
+        let audioIcon = audioButton.querySelector("i");
+        audioButton.onclick = function () {
+          if (audio.paused) {
+            audio.play();
+            audioIcon.classList.remove("fa-volume-off");
+            audioIcon.classList.add("fa-volume-high");
             audioButton.classList.remove("additional-content__item--disabled");
-          }, 100);
-        }
+          }
+        };
+        audio.onended = function () {
+          audioIcon.classList.remove("fa-volume-high");
+          audioIcon.classList.add("fa-volume-off");
+        };
+        setTimeout(function () {
+          audioButton.classList.remove("additional-content__item--disabled");
+        }, 100);
       }
     }
+    // }
   }
 
   // Listen for the Turbo event "didCompleteSubject"
