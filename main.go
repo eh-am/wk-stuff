@@ -10,6 +10,7 @@ import (
 	"os"
 )
 
+// helper code for the wanikanji kanji plugin i created
 func main() {
 	fmt.Println("starting")
 	//	downloadVocabs()
